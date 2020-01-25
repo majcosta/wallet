@@ -1,15 +1,25 @@
 class FieldElement {
-  BigInt _num = BigInt.from(0);
-  BigInt _prime = BigInt.from(0);
+  BigInt _num;
+  BigInt _prime;
 
-  FieldElement(int number, int prime) {
-    _num = BigInt.from(number);
-    _prime = BigInt.from(prime);
+  FieldElement(BigInt number, BigInt prime)
+      : _num = number,
+        _prime = prime;
+
+  FieldElement.fromInt(int number, int prime)
+      : _num = BigInt.from(number),
+        _prime = BigInt.from(prime);
+
+  bool isZero() {
+    return _num == BigInt.zero;
   }
 
-  FieldElement.fromBigInt(BigInt number, BigInt prime) {
-    _num = number;
-    _prime = prime;
+  BigInt getPrime() {
+    return _prime;
+  }
+
+  BigInt getNum() {
+    return _num;
   }
 
   bool operator ==(covariant FieldElement other) =>
@@ -17,31 +27,33 @@ class FieldElement {
 
   FieldElement operator +(covariant FieldElement other) {
     if (other._prime != _prime) throw Exception("Different fields");
-    return FieldElement.fromBigInt((other._num + _num) % _prime, _prime);
+    return FieldElement((_num + other._num) % _prime, _prime);
   }
 
   FieldElement operator -(covariant FieldElement other) {
     if (other._prime != _prime) throw Exception("Different fields");
-    return FieldElement.fromBigInt((other._num + _num) % _prime, _prime);
+    return FieldElement((_num - other._num) % _prime, _prime);
   }
 
   FieldElement operator *(covariant FieldElement other) {
     if (other._prime != _prime) throw Exception("Different fields");
-    return FieldElement.fromBigInt((other._num * _num) % _prime, _prime);
+    return FieldElement((_num * other._num) % _prime, _prime);
   }
 
-  FieldElement operator ^(covariant int exponent) {
-    return FieldElement.fromBigInt(
-        _num.modPow(BigInt.from(exponent), _prime), _prime);
+  FieldElement pow(BigInt exponent) {
+    var non_negative_exponent = exponent % (_prime - BigInt.one);
+    return FieldElement(_num.modPow(non_negative_exponent, _prime), _prime);
   }
 
   FieldElement operator /(covariant FieldElement other) {
     if (other._prime != _prime) throw Exception("Different fields");
-    if (other._num == BigInt.from(0)) throw Exception("Can't divide by zero");
-    //var result =
+    if (other._num == BigInt.zero) throw Exception("Can't divide by zero");
+    var result =
+        (_num * other._num.modPow(_prime - BigInt.two, _prime) % _prime);
+    return FieldElement(result, _prime);
   }
 
-  void printElement() {
-    print("Elemento ${_num} do campo ${_prime}");
+  String toString() {
+    return "($_num,$_prime)";
   }
 }
